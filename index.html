@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Health Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --sky: #5BB8E8;
+    --deep: #0077b6;
+    --navy: #023e8a;
+    --white: #ffffff;
+    --card-bg: rgba(255,255,255,0.92);
+    --input-border: #c9dff0;
+    --text: #1a2e3b;
+    --muted: #5a7a8a;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #b8e0f7 0%, #e0f4ff 40%, #cde9fc 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+  }
+
+  /* ── Top Nav ── */
+  .top-buttons {
+    position: fixed;
+    top: 18px;
+    right: 28px;
+    z-index: 100;
+    display: flex;
+    gap: 10px;
+  }
+
+  .top-buttons button {
+    padding: 9px 18px;
+    border: none;
+    border-radius: 50px;
+    background: var(--white);
+    color: var(--deep);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    font-size: 0.85rem;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0,119,182,0.15);
+    transition: all 0.25s;
+  }
+
+  .top-buttons button:hover {
+    background: var(--deep);
+    color: var(--white);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(0,119,182,0.3);
+  }
+
+  /* ── Main Card ── */
+  .container {
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    border-radius: 24px;
+    padding: 40px 36px 36px;
+    width: 100%;
+    max-width: 380px;
+    margin-top: 80px;
+    box-shadow: 0 20px 60px rgba(0,100,160,0.18);
+    border: 1px solid rgba(255,255,255,0.7);
+    animation: floatIn 0.6s ease both;
+  }
+
+  @keyframes floatIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .header-icon {
+    font-size: 2.2rem;
+    text-align: center;
+    margin-bottom: 6px;
+  }
+
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    color: var(--text);
+    text-align: center;
+    margin-bottom: 28px;
+    letter-spacing: -0.5px;
+  }
+
+  .field {
+    margin-bottom: 16px;
+  }
+
+  label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 6px;
+  }
+
+  input, select {
+    display: block;
+    width: 100%;
+    padding: 11px 14px;
+    border-radius: 10px;
+    border: 1.5px solid var(--input-border);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    color: var(--text);
+    background: #f4f9fd;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+
+  input:focus, select:focus {
+    border-color: var(--sky);
+    box-shadow: 0 0 0 3px rgba(91,184,232,0.2);
+    background: #fff;
+  }
+
+  .calc-btn {
+    width: 100%;
+    padding: 13px;
+    background: linear-gradient(135deg, var(--deep), var(--navy));
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+    letter-spacing: 0.3px;
+    transition: all 0.25s;
+    box-shadow: 0 6px 20px rgba(0,119,182,0.35);
+  }
+
+  .calc-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(0,119,182,0.45);
+  }
+
+  /* ── Result ── */
+  #result {
+    margin-top: 22px;
+    padding: 18px 20px;
+    border-radius: 14px;
+    font-size: 0.93rem;
+    line-height: 1.9;
+    display: none;
+    animation: slideUp 0.35s ease both;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  #result.show { display: block; }
+
+  .result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+  }
+
+  .result-label { font-weight: 500; opacity: 0.75; font-size: 0.85rem; }
+  .result-value { font-weight: 700; font-size: 1rem; }
+
+  .result-divider { border: none; border-top: 1px solid rgba(0,0,0,0.08); margin: 6px 0; }
+
+  .bmi-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 50px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  .underweight { background: #fff3cd; color: #856404; }
+  .underweight .bmi-badge { background: #f9c74f; color: #5a4000; }
+
+  .normal { background: #d4edda; color: #1a5c2a; }
+  .normal .bmi-badge { background: #52b788; color: #fff; }
+
+  .overweight { background: #ffe5cc; color: #7a3b00; }
+  .overweight .bmi-badge { background: #f9844a; color: #fff; }
+
+  .obese { background: #fdd; color: #7a1010; }
+  .obese .bmi-badge { background: #f94144; color: #fff; }
+
+  /* ── Overlay + Popups ── */
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10,30,50,0.55);
+    backdrop-filter: blur(3px);
+    z-index: 200;
+  }
+
+  .section {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.95);
+    background: white;
+    padding: 36px 32px 28px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 440px;
+    text-align: center;
+    z-index: 300;
+    box-shadow: 0 30px 70px rgba(0,60,120,0.25);
+    opacity: 0;
+    transition: all 0.28s cubic-bezier(0.34,1.4,0.64,1);
+  }
+
+  .section.active {
+    display: block;
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  .section h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.6rem;
+    color: var(--text);
+    margin-bottom: 22px;
+  }
+
+  .team {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 18px;
+  }
+
+  .person {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .person img {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--sky);
+  }
+
+  .person h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .person h5 {
+    font-size: 0.78rem;
+    font-weight: 400;
+    color: var(--muted);
+  }
+
+  .person p {
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+
+  .person a {
+    font-size: 0.8rem;
+    color: var(--deep);
+    font-weight: 600;
+    text-decoration: none;
+    border: 1.5px solid var(--deep);
+    padding: 4px 12px;
+    border-radius: 50px;
+    transition: all 0.2s;
+  }
+
+  .person a:hover {
+    background: var(--deep);
+    color: white;
+  }
+
+  .close-btn {
+    margin-top: 22px;
+    padding: 9px 26px;
+    background: #f0f4f8;
+    color: var(--text);
+    border: none;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .close-btn:hover { background: #dce8f0; }
+
+  .error-msg {
+    color: #c0392b;
+    font-size: 0.88rem;
+    margin-top: 14px;
+    text-align: center;
+    font-weight: 500;
+  }
+</style>
+</head>
+<body>
+
+<!-- Top Buttons -->
+<div class="top-buttons">
+  <button onclick="openSection('about')">About Us</button>
+  <button onclick="openSection('teacher')">About Teacher</button>
+</div>
+
+<!-- Main Card -->
+<div class="container">
+  <div class="header-icon">🩺</div>
+  <h1>Health Tracker</h1>
+
+  <div class="field">
+    <label>Age</label>
+    <input type="number" id="age" placeholder="e.g. 25" min="1" max="120">
+  </div>
+
+  <div class="field">
+    <label>Gender</label>
+    <select id="gender">
+      <option value="male">Male</option>
+      <option value="female">Female</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label>Height (cm)</label>
+    <input type="number" id="height" placeholder="e.g. 170" min="50" max="250">
+  </div>
+
+  <div class="field">
+    <label>Weight (kg)</label>
+    <input type="number" id="weight" placeholder="e.g. 65" min="10" max="300">
+  </div>
+
+  <button class="calc-btn" onclick="calculate()">Calculate</button>
+
+  <div id="result"></div>
+</div>
+
+<!-- Overlay -->
+<div id="overlay" class="overlay" onclick="closeSections()"></div>
+
+<!-- About Us -->
+<div id="about" class="section">
+  <h2>About Us</h2>
+  <div class="team">
+    <div class="person">
+      <img src="muskan.jpeg" alt="Muskan Rana">
+      <h3>Muskan Rana</h3>
+      <h5>ID: 2511981156</h5>
+      <a href="https://www.linkedin.com/in/muskan-rana-65b74138a" target="_blank">LinkedIn</a>
+    </div>
+    <div class="person">
+      <img src="nilakshi.jpeg" alt="Nilakshi Thakur" onerror="this.src='https://ui-avatars.com/api/?name=Nilakshi+Thakur&background=5BB8E8&color=fff&size=88'">
+      <h3>Nilakshi Thakur</h3>
+      <h5>ID: 2511981168</h5>
+      <a href="https://www.linkedin.com/in/nilakshi-thakur-3891a238b" target="_blank">LinkedIn</a>
+    </div>
+  </div>
+  <button class="close-btn" onclick="closeSections()">Close</button>
+</div>
+
+<!-- About Teacher -->
+<div id="teacher" class="section">
+  <h2>About Teacher</h2>
+  <div class="person">
+    <img src="https://i.ibb.co/sJgdt1zY/IMG-20260503-WA0037.jpg" alt="Dr Abhishek Thakur" onerror="this.src='https://ui-avatars.com/api/?name=Abhishek+Thakur&background=0077b6&color=fff&size=88'">
+    <h3>Dr Abhishek Thakur</h3>
+    <p>Assistant Professor, Chitkara University</p>
+    <a href="https://www.linkedin.com/in/dr-abhishek-thakur-00123321" target="_blank">LinkedIn</a>
+  </div>
+  <button class="close-btn" onclick="closeSections()">Close</button>
+</div>
+
+<script>
+  function openSection(id) {
+    document.getElementById("overlay").style.display = "block";
+    const el = document.getElementById(id);
+    el.style.display = "block";
+    // trigger transition
+    requestAnimationFrame(() => el.classList.add("active"));
+  }
+
+  function closeSections() {
+    document.getElementById("overlay").style.display = "none";
+    ["about", "teacher"].forEach(id => {
+      const el = document.getElementById(id);
+      el.classList.remove("active");
+      setTimeout(() => { el.style.display = "none"; }, 280);
+    });
+  }
+
+  function calculate() {
+    const age    = parseInt(document.getElementById("age").value);
+    const height = parseFloat(document.getElementById("height").value);
+    const weight = parseFloat(document.getElementById("weight").value);
+    const gender = document.getElementById("gender").value;
+
+    const resultBox = document.getElementById("result");
+
+    if (!age || !height || !weight) {
+      resultBox.className = "show";
+      resultBox.innerHTML = `<div class="error-msg">⚠️ Please fill in all fields.</div>`;
+      return;
+    }
+
+    const bmi = (weight / ((height / 100) ** 2)).toFixed(2);
+
+    let status, className;
+    if      (bmi < 18.5) { status = "Underweight"; className = "underweight"; }
+    else if (bmi < 25)   { status = "Normal";       className = "normal"; }
+    else if (bmi < 30)   { status = "Overweight";   className = "overweight"; }
+    else                  { status = "Obese";        className = "obese"; }
+
+    const bmr = gender === "male"
+      ? (10 * weight + 6.25 * height - 5 * age + 5)
+      : (10 * weight + 6.25 * height - 5 * age - 161);
+
+    const bodyFat = gender === "male"
+      ? (1.20 * bmi + 0.23 * age - 16.2)
+      : (1.20 * bmi + 0.23 * age - 5.4);
+
+    const visceralFat = bmi < 18.5 ? "Low"
+      : bmi < 25 ? "Healthy"
+      : bmi < 30 ? "High"
+      : "Very High";
+
+    resultBox.className = `${className} show`;
+    resultBox.innerHTML = `
+      <div class="result-row">
+        <span class="result-label">BMI</span>
+        <span class="result-value">${bmi} <span class="bmi-badge">${status}</span></span>
+      </div>
+      <hr class="result-divider">
+      <div class="result-row">
+        <span class="result-label">BMR</span>
+        <span class="result-value">${bmr.toFixed(0)} kcal/day</span>
+      </div>
+      <hr class="result-divider">
+      <div class="result-row">
+        <span class="result-label">Body Fat</span>
+        <span class="result-value">${bodyFat.toFixed(2)}%</span>
+      </div>
+      <hr class="result-divider">
+      <div class="result-row">
+        <span class="result-label">Visceral Fat</span>
+        <span class="result-value">${visceralFat}</span>
+      </div>
+    `;
+  }
+</script>
+</body>
+</html>

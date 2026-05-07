@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Health Tracker</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- Top Buttons -->
+<button id="aboutBtn">About Us</button>
+button id="teacherBtn">About Teacher</button>
+
+<!-- Main -->
+<div class="container">
+    <h2>Health Tracker</h2>
+
+    <input id="age" placeholder="Age">
+    <input id="height" placeholder="Height (cm)">
+    <input id="weight" placeholder="Weight (kg)">
+
+    <select id="gender">
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+    </select>
+
+    <button id="calcBtn">Calculate</button>
+
+    <div id="result"></div>
+</div>
+
+<!-- Overlay -->
+<div id="overlay" class="overlay"></div>
+
+<!-- About Us -->
+<div id="about" class="section">
+    <h3>About Us</h3>
+
+    <p>Muskan Rana - 2511981156</p>
+    <p>Nilakshi Thakur - 2511981168</p>
+
+    <button onclick="closeAll()">Close</button>
+</div>
+
+<!-- Teacher -->
+<div id="teacher" class="section">
+    <h3>About Teacher</h3>
+    <p>Dr Abhishek Thakur</p>
+    <p>Assistant Professor</p>
+
+    <button onclick="closeAll()">Close</button>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
